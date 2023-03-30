@@ -2,26 +2,221 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>抽奖页面</title>
+    <title>转盘抽奖</title>
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <style>
+        body {
+            background-color: #fff;
+            font-family: Arial, sans-serif;
+        }
+        #wheel {
+            width: 350px;
+            height: 350px;
+            position: relative;
+            margin: 0 auto;
+        }
+        #spin {
+            margin-top: 50px;
+            text-align: center;
+        }
+        #spin button {
+            background-color: #4CAF50;
+            color: white;
+            font-size: 24px;
+            padding: 20px 40px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            outline: none;
+        }
+        #spin button:hover {
+            background-color: #3e8e41;
+        }
+        #result {
+            margin-top: 50px;
+            text-align: center;
+            font-size: 36px;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
-<h1>抽奖页面</h1>
-<p>点击下面的按钮抽奖:</p>
-<button onclick="pickWinner()">抽奖</button>
-<p id="result"></p>
-<script>
-    function pickWinner() {
-        //随机选择一个数字（1-10）作为中奖号码
-        var luckyNumber = Math.floor(Math.random() * 10) + 1;
+<h1>转盘抽奖</h1>
+<div id="wheel">
+    <div class="sec"><span>1</span></div>
+    <div class="sec"><span>2</span></div>
+    <div class="sec"><span>3</span></div>
+    <div class="sec"><span>4</span></div>
+    <div class="sec"><span>5</span></div>
+    <div class="sec"><span>6</span></div>
+    <div class="sec"><span>7</span></div>
+    <div class="sec"><span>8</span></div>
+    <div class="sec"><span>9</span></div>
+    <div class="sec"><span>10</span></div>
+    <div class="sec"><span>11</span></div>
+    <div class="sec"><span>12</span></div>
+    <div class="sec"><span>13</span></div>
+    <div class="sec"><span>14</span></div>
+    <div class="sec"><span>15</span></div>
+    <div class="sec"><span>16</span></div>
+    <div class="sec"><span>17</span></div>
+    <div class="sec"><span>18</span></div>
+    <div class="sec"><span>19</span></div>
+    <div class="sec"><span>20</span></div>
+    <canvas id="canvas" width="350" height="350"></canvas>
+</div>
+<div id="spin">
+    <button id="spinBtn">开始抽奖</button>
+</div>
+<div id="result"></div>
+<script src="script.js"></script>
+</body>
 
-        //检查用户选择的号码是否与中奖号码匹配
-        var selectedNumber = prompt("请输入您的选择（从1到10之间的数字）：");
-        if (luckyNumber == selectedNumber) {
-            document.getElementById("result").innerHTML = "恭喜中奖！";
-        } else {
-            document.getElementById("result").innerHTML = "很遗憾，您未中奖！";
+</html>
+
+
+<style>
+    #canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+    }
+    .sec {
+        position: absolute;
+        width: 0;
+        height: 0;
+        border-style: solid;
+        border-width: 0 175px 200px 175px;
+        border-color: transparent transparent #f7b731 transparent;
+        transform-origin: center bottom;
+        transition: transform 1.25s ease;
+    }
+    .sec span {
+        transform: rotate(-11.25deg) translate(80px) rotate(11.25deg);
+        display: block;
+        width: 1px;
+        height: 115px;
+        background-color: #f7b731;
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        margin: auto;
+        z-index: 999;
+    }
+    .sec:nth-child(1) { transform: rotate(0deg); }
+    .sec:nth-child(2) { transform: rotate(18deg); }
+    .sec:nth-child(3) { transform: rotate(36deg); }
+    .sec:nth-child(4) { transform: rotate(54deg); }
+    .sec:nth-child(5) { transform: rotate(72deg); }
+    .sec:nth-child(6) { transform: rotate(90deg); }
+    .sec:nth-child(7) { transform: rotate(108deg); }
+    .sec:nth-child(8) { transform: rotate(126deg); }
+    .sec:nth-child(9) { transform: rotate(144deg); }
+    .sec:nth-child(10) { transform: rotate(162deg); }
+    .sec:nth-child(11) { transform: rotate(180deg); }
+    .sec:nth-child(12) { transform: rotate(198deg); }
+    .sec:nth-child(13) { transform: rotate(216deg); }
+    .sec:nth-child(14) { transform: rotate(234deg); }
+    .sec:nth-child(15) { transform: rotate(252deg); }
+    .sec:nth-child(16) { transform: rotate(270deg); }
+    .sec:nth-child(17) { transform: rotate(288deg); }
+    .sec:nth-child(18) { transform: rotate(306deg); }
+    .sec:nth-child(19) { transform: rotate(324deg); }
+    .sec:nth-child(20) { transform: rotate(342deg); }
+
+</style>
+
+<script>$(document).ready(function() {
+    var canvas = document.getElementById("canvas");
+    var ctx = canvas.getContext("2d");
+    var outsideRadius = 150;
+    var textRadius = 120;
+    var insideRadius = 70;
+    var startAngle = 0;
+    var arc = Math.PI / 10;
+    var colors = ["#FFFF99", "#FFCC99", "#FF9999", "#FF6666", "#FF3333", "#FF00FF", "#CC00CC", "#99CC33", "#006699", "#660066"];
+    var texts = ["奖品1", "奖品2", "奖品3", "奖品4", "奖品5", "奖品6", "奖品7", "奖品8", "奖品9", "奖品10"];
+    var spinTimeout = null;
+    var spinArcStart = 10;
+    var spinTimeTotal = 0;
+    var spinTime = 0;
+
+    drawWheel();
+
+    $('#spinBtn').click(function() {
+        spin();
+    });
+
+    function drawSlice(angle, color) {
+        ctx.beginPath();
+        ctx.fillStyle = color;
+        ctx.moveTo(175, 175);
+        ctx.arc(175, 175, outsideRadius, angle, angle + arc, false);
+        ctx.lineTo(175, 175);
+        ctx.fill();
+        ctx.closePath();
+    }
+
+    function drawText(angle, text) {
+        ctx.save();
+        ctx.translate(175, 175);
+        ctx.rotate(angle + arc / 2);
+        ctx.textAlign = "left";
+        ctx.fillStyle = "#000";
+        ctx.font = "bold 18px Arial";
+        ctx.fillText(text, textRadius, 0);
+        ctx.restore();
+    }
+
+    function drawWheel() {
+        var angle = startAngle;
+        for (var i = 0; i < colors.length; i++) {
+            drawSlice(angle, colors[i]);
+            drawText(angle, texts[i]);
+            angle += arc;
         }
     }
+
+    function spin() {
+        spinTime = 0;
+        spinTimeTotal = Math.floor(Math.random() * 10) + 1 * 1000;
+        rotateWheel();
+    }
+
+    function rotateWheel() {
+        spinTime += 30;
+        if (spinTime >= spinTimeTotal) {
+            stopRotateWheel();
+            return;
+        }
+        var spinAngle = spinArcStart - easeOut(spinTime, 0, spinArcStart, spinTimeTotal);
+        startAngle += (spinAngle * Math.PI) / 180;
+        drawWheel();
+        spinTimeout = setTimeout(function() {
+            rotateWheel();
+        }, 30);
+    }
+
+    function stopRotateWheel() {
+        clearTimeout(spinTimeout);
+        var degrees = (startAngle * 180) / Math.PI + 90;
+        var arcd = arc * (180 / Math.PI);
+        var index = Math.floor((360 - degrees % 360) / arcd);
+        ctx.save();
+        ctx.font = "bold 30px Arial";
+        var text = texts[index];
+        var prize = "恭喜获得 " + text + " !";
+        document.getElementById('result').innerHTML = prize;
+        ctx.restore();
+    }
+
+    function easeOut(t, b, c, d) {
+        var ts = (t /= d) * t;
+        var tc = ts * t;
+        return b + c * (tc + -3 * ts + 3 * t);
+    }
+});
 </script>
-</body>
-</html>
+
+
+
