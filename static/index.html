@@ -1,1 +1,27 @@
-111
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>抽奖页面</title>
+</head>
+<body>
+<h1>抽奖页面</h1>
+<p>点击下面的按钮抽奖:</p>
+<button onclick="pickWinner()">抽奖</button>
+<p id="result"></p>
+<script>
+    function pickWinner() {
+        //随机选择一个数字（1-10）作为中奖号码
+        var luckyNumber = Math.floor(Math.random() * 10) + 1;
+
+        //检查用户选择的号码是否与中奖号码匹配
+        var selectedNumber = prompt("请输入您的选择（从1到10之间的数字）：");
+        if (luckyNumber == selectedNumber) {
+            document.getElementById("result").innerHTML = "恭喜中奖！";
+        } else {
+            document.getElementById("result").innerHTML = "很遗憾，您未中奖！";
+        }
+    }
+</script>
+</body>
+</html>
